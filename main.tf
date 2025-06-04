@@ -25,79 +25,40 @@ provider "hcp" {
 }
 
 # Data sources to fetch infrastructure details from HCP Vault Secrets
-data "hcp_vault_secrets_secret" "vpc_id" {
-  app_name    = var.waypoint_application
-  secret_name = "vpc_id"
-  project_id  = var.ddr_user_hcp_project_resource_id
+locals {
+  all_secrets = [
+    "vpc_id",
+    "vpc_cidr_block",
+    "private_subnet_ids",
+    "public_subnet_ids",
+    "all_subnet_ids",
+    "app_security_group_id",
+    "instance_role_name",
+    "common_tags",
+    "environment",
+    "project_name"
+  ]
 }
 
-data "hcp_vault_secrets_secret" "vpc_cidr_block" {
+data "hcp_vault_secrets_secret" "this" {
+  for_each    = toset(local.all_secrets)
   app_name    = var.waypoint_application
-  secret_name = "vpc_cidr_block"
-  project_id  = var.ddr_user_hcp_project_resource_id
-}
-
-data "hcp_vault_secrets_secret" "private_subnet_ids" {
-  app_name    = var.waypoint_application
-  secret_name = "private_subnet_ids"
-  project_id  = var.ddr_user_hcp_project_resource_id
-}
-
-data "hcp_vault_secrets_secret" "public_subnet_ids" {
-  app_name    = var.waypoint_application
-  secret_name = "public_subnet_ids"
-  project_id  = var.ddr_user_hcp_project_resource_id
-}
-
-data "hcp_vault_secrets_secret" "all_subnet_ids" {
-  app_name    = var.waypoint_application
-  secret_name = "all_subnet_ids"
-  project_id  = var.ddr_user_hcp_project_resource_id
-}
-
-data "hcp_vault_secrets_secret" "app_security_group_id" {
-  app_name    = var.waypoint_application
-  secret_name = "app_security_group_id"
-  project_id  = var.ddr_user_hcp_project_resource_id
-}
-
-data "hcp_vault_secrets_secret" "instance_role_name" {
-  app_name    = var.waypoint_application
-  secret_name = "instance_role_name"
-  project_id  = var.ddr_user_hcp_project_resource_id
-}
-
-data "hcp_vault_secrets_secret" "common_tags" {
-  app_name    = var.waypoint_application
-  secret_name = "common_tags"
-  project_id  = var.ddr_user_hcp_project_resource_id
-}
-
-data "hcp_vault_secrets_secret" "environment" {
-  app_name    = var.waypoint_application
-  secret_name = "environment"
-  project_id  = var.ddr_user_hcp_project_resource_id
-}
-
-data "hcp_vault_secrets_secret" "project_name" {
-  app_name    = var.waypoint_application
-  secret_name = "project_name"
-  project_id  = var.ddr_user_hcp_project_resource_id
+  secret_name = each.key
 }
 
 # Local values to parse and use the infrastructure secrets
 locals {
   # Parse infrastructure outputs from HCP Vault Secrets
-  vpc_id                = data.hcp_vault_secrets_secret.vpc_id.secret_value
-  vpc_cidr_block        = data.hcp_vault_secrets_secret.vpc_cidr_block.secret_value
-  private_subnet_ids    = split(",", data.hcp_vault_secrets_secret.private_subnet_ids.secret_value)
-  public_subnet_ids     = split(",", data.hcp_vault_secrets_secret.public_subnet_ids.secret_value)
-  all_subnet_ids        = split(",", data.hcp_vault_secrets_secret.all_subnet_ids.secret_value)
-  app_security_group_id = data.hcp_vault_secrets_secret.app_security_group_id.secret_value
-  instance_role_name    = data.hcp_vault_secrets_secret.instance_role_name.secret_value
-  common_tags           = jsondecode(data.hcp_vault_secrets_secret.common_tags.secret_value)
-  environment           = data.hcp_vault_secrets_secret.environment.secret_value
-  project_name          = data.hcp_vault_secrets_secret.project_name.secret_value
+  vpc_id                = data.hcp_vault_secrets_secret.this["vpc_id"].secret_value
+  vpc_cidr_block        = data.hcp_vault_secrets_secret.this["vpc_cidr_block"].secret_value
+  private_subnet_ids    = split(",", data.hcp_vault_secrets_secret.this["private_subnet_ids"].secret_value)
+  public_subnet_ids     = split(",", data.hcp_vault_secrets_secret.this["public_subnet_ids"].secret_value)
+  all_subnet_ids        = split(",", data.hcp_vault_secrets_secret.this["all_subnet_ids"].secret_value)
+  app_security_group_id = data.hcp_vault_secrets_secret.this["app_security_group_id"].secret_value
+  instance_role_name    = data.hcp_vault_secrets_secret.this["instance_role_name"].secret_value
+  common_tags           = jsondecode(data.hcp_vault_secrets_secret.this["common_tags"].secret_value)
+  environment           = data.hcp_vault_secrets_secret.this["environment"].secret_value
+  project_name          = data.hcp_vault_secrets_secret.this["project_name"].secret_value
 }
 
 data "aws_ami" "amazon_linux" {
