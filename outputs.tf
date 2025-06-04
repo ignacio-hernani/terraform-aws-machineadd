@@ -11,6 +11,7 @@ output "instance_private_ips" {
 output "key_pair_name" {
   description = "Name of the created key pair"
   value       = aws_key_pair.main.key_name
+  sensitive   = true
 }
 
 output "private_key_pem" {
@@ -28,6 +29,7 @@ output "instance_details" {
       private_ip  = module.ec2_instances.private_ips[idx]
     }
   }
+  sensitive   = true
 }
 
 output "public_ip_note" {
@@ -59,4 +61,5 @@ output "infrastructure_details" {
     project_name = local.project_name
     subnet_count = length(local.all_subnet_ids)
   }
+  sensitive   = true
 }
