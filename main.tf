@@ -21,7 +21,9 @@ provider "aws" {
 
 # HCP Provider Configuration
 provider "hcp" {
-  project_id = var.ddr_user_hcp_project_resource_id
+  project_id    = var.ddr_user_hcp_project_resource_id
+  client_id     = var.hcp_client_id
+  client_secret = var.hcp_client_secret
 }
 
 # Data sources to fetch infrastructure details from HCP Vault Secrets

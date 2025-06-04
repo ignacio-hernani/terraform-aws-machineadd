@@ -39,6 +39,10 @@ The module automatically retrieves the following secrets from HCP Vault Secrets:
 waypoint_application = "your-waypoint-app-name"
 ddr_user_hcp_project_resource_id = "your-hcp-project-id"
 
+# HCP Authentication (for Terraform Cloud/Enterprise)
+hcp_client_id = "your-hcp-service-principal-client-id"
+hcp_client_secret = "your-hcp-service-principal-client-secret"
+
 # AWS Configuration
 aws_region = "us-east-1"
 ```
@@ -155,7 +159,8 @@ The module automatically generates an SSH key pair. To connect to instances:
 1. **Networking module deployed**: The `terraform-aws-tenantdemo` module must be deployed first
 2. **HCP Vault Secrets populated**: Networking details must be available in HCP Vault Secrets
 3. **AWS credentials**: Configured for the target AWS account
-4. **HCP credentials**: Configured for accessing Vault Secrets
+4. **HCP Service Principal**: Created and configured with proper permissions
+5. **HCP credentials**: Service principal credentials configured as Terraform variables
 
 ## Integration with Waypoint
 
@@ -188,4 +193,26 @@ This module depends on:
 1. **"Secret not found"**: Ensure the networking module is deployed first
 2. **"Invalid subnet"**: Check that subnets exist in the specified region
 3. **"Access denied"**: Verify HCP project permissions
-4. **"Instance launch failed"**: Check AWS service quotas and limits 
+4. **"Instance launch failed"**: Check AWS service quotas and limits
+5. **"unable to create HCP api client: no valid credentials available"**: This occurs when HCP authentication fails in automated environments
+   - **Solution**: Configure HCP service principal credentials (`hcp_client_id` and `hcp_client_secret`)
+   - **Cause**: The HCP provider is trying to use interactive authentication (browser) in a headless environment
+   - **Prevention**: Always use service principal authentication for CI/CD pipelines and Terraform Cloud
+
+### HCP Service Principal Setup
+
+For automated deployments (Terraform Cloud/Enterprise/Waypoint), you need to create an HCP service principal:
+
+1. **Create Service Principal**:
+   - Go to HCP Console → Access Control (IAM) → Service Principals
+   - Click "Create service principal"
+   - Name it (e.g., "terraform-vm-addon-sp")
+   - Save the Client ID and Client Secret
+
+2. **Assign Permissions**:
+   - Assign the service principal to your HCP project
+   - Grant `Contributor` or `Viewer` role (minimum required for Vault Secrets access)
+
+3. **Configure Variables**:
+   - Set `hcp_client_id` and `hcp_client_secret` as sensitive variables in your Terraform workspace
+   - These credentials enable non-interactive authentication 
