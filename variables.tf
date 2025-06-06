@@ -9,18 +9,19 @@ variable "ddr_user_hcp_project_resource_id" {
   type        = string
 }
 
-# HCP Service Principal Authentication Variables
-variable "hcp_client_id" {
-  description = "HCP service principal client ID"
-  type        = string
-  sensitive   = false
-}
+# Old HCP Authentication (if not using environment variables)
+# variable "hcp_client_id" {
+#  description = "HCP service principal client ID (optional if using env vars)"
+#   type        = string
+#   sensitive   = false
+# }
 
-variable "hcp_client_secret" {
-  description = "HCP service principal client secret"
-  type        = string
-  sensitive   = true
-}
+# variable "hcp_client_secret" {
+#   description = "HCP service principal client secret (optional if using env vars)"
+#   type        = string
+#   sensitive   = true
+# }
+
 
 variable "aws_region" {
   description = "AWS region"

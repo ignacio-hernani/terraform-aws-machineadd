@@ -40,8 +40,9 @@ waypoint_application = "your-waypoint-app-name"
 ddr_user_hcp_project_resource_id = "your-hcp-project-id"
 
 # HCP Authentication (for Terraform Cloud/Enterprise)
-hcp_client_id = "your-hcp-service-principal-client-id"
-hcp_client_secret = "your-hcp-service-principal-client-secret"
+# For automated environments (Waypoint/TFC), set these environment variables in the UI:
+# HCP_CLIENT_ID     = "your-service-principal-client-id"
+# HCP_CLIENT_SECRET = "your-service-principal-client-secret"
 
 # AWS Configuration
 aws_region = "us-east-1"
@@ -195,7 +196,7 @@ This module depends on:
 3. **"Access denied"**: Verify HCP project permissions
 4. **"Instance launch failed"**: Check AWS service quotas and limits
 5. **"unable to create HCP api client: no valid credentials available"**: This occurs when HCP authentication fails in automated environments
-   - **Solution**: Configure HCP service principal credentials (`hcp_client_id` and `hcp_client_secret`)
+   - **Solution**: Configure HCP service principal credentials as environment variables: 
    - **Cause**: The HCP provider is trying to use interactive authentication (browser) in a headless environment
    - **Prevention**: Always use service principal authentication for CI/CD pipelines and Terraform Cloud
 
@@ -214,5 +215,5 @@ For automated deployments (Terraform Cloud/Enterprise/Waypoint), you need to cre
    - Grant `Contributor` or `Viewer` role (minimum required for Vault Secrets access)
 
 3. **Configure Variables**:
-   - Set `hcp_client_id` and `hcp_client_secret` as sensitive variables in your Terraform workspace
+   - Set `HCP_CLIENT_ID` and `HCP_CLIENT_SECRET` as environment variables in your Terraform
    - These credentials enable non-interactive authentication 
