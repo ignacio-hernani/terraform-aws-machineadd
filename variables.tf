@@ -13,7 +13,7 @@ variable "ddr_user_hcp_project_resource_id" {
 variable "hcp_client_id" {
   description = "HCP service principal client ID"
   type        = string
-  sensitive   = true
+  sensitive   = false
 }
 
 variable "hcp_client_secret" {
