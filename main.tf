@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/hcp"
       version = "~> 0.104.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.7.2"
+    }
   }
 }
 
@@ -46,6 +50,13 @@ data "hcp_vault_secrets_secret" "this" {
   for_each    = toset(local.all_secrets)
   app_name    = var.waypoint_application
   secret_name = each.key
+}
+
+# Generate a random string for each workspace
+resource "random_string" "identifier" {
+  length  = 5
+  special = false
+  upper   = false
 }
 
 # Local values to parse and use the infrastructure secrets
@@ -86,13 +97,13 @@ resource "tls_private_key" "main" {
 }
 
 resource "aws_key_pair" "main" {
-  key_name   = "${local.project_name}-${local.environment}-keypair"
+  key_name   = "${local.project_name}-${local.environment}-keypair-${random_string.identifier.result}"
   public_key = tls_private_key.main.public_key_openssh
 
   tags = merge(
     local.common_tags,
     {
-      Name = "${local.project_name}-${local.environment}-keypair"
+      Name = "${local.project_name}-${local.environment}-keypair-${random_string.identifier.result}"
     }
   )
 }
@@ -107,22 +118,22 @@ module "ec2_instances" {
 
   instances = [
     {
-      name               = "${local.project_name}-${local.environment}-instance-1"
+      name               = "${local.project_name}-${local.environment}-instance-1-${random_string.identifier.result}"
       instance_type      = var.instance_types["flavor1"]
       subnet_id          = length(local.private_subnet_ids) > 0 ? local.private_subnet_ids[0] : local.all_subnet_ids[0]
       security_group_ids = [local.app_security_group_id]
       iam_role_name      = local.instance_role_name
       user_data_file     = null
-      tags               = merge(local.common_tags, { Name = "${local.project_name}-${local.environment}-instance-1" })
+      tags               = merge(local.common_tags, { Name = "${local.project_name}-${local.environment}-instance-1-${random_string.identifier.result}" })
     },
     {
-      name               = "${local.project_name}-${local.environment}-instance-2"
+      name               = "${local.project_name}-${local.environment}-instance-2-${random_string.identifier.result}"
       instance_type      = var.instance_types["flavor2"]
       subnet_id          = length(local.private_subnet_ids) > 1 ? local.private_subnet_ids[1] : (length(local.all_subnet_ids) > 1 ? local.all_subnet_ids[1] : local.all_subnet_ids[0])
       security_group_ids = [local.app_security_group_id]
       iam_role_name      = local.instance_role_name
       user_data_file     = null
-      tags               = merge(local.common_tags, { Name = "${local.project_name}-${local.environment}-instance-2" })
+      tags               = merge(local.common_tags, { Name = "${local.project_name}-${local.environment}-instance-2-${random_string.identifier.result}" })
     }
   ]
 
