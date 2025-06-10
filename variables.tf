@@ -4,24 +4,10 @@ variable "waypoint_application" {
   type        = string
 }
 
-variable "ddr_user_hcp_project_resource_id" {
-  description = "HCP project resource ID for the user"
-  type        = string
-}
-
-# Old HCP Authentication (if not using environment variables)
-# variable "hcp_client_id" {
-#  description = "HCP service principal client ID (optional if using env vars)"
+# variable "hcp_project_resource_id" {
+#   description = "HCP project resource ID for the user"
 #   type        = string
-#   sensitive   = false
 # }
-
-# variable "hcp_client_secret" {
-#   description = "HCP service principal client secret (optional if using env vars)"
-#   type        = string
-#   sensitive   = true
-# }
-
 
 variable "aws_region" {
   description = "AWS region"
@@ -69,3 +55,18 @@ variable "vm_count" {
     error_message = "The vm_count value must be greater than 0."
   }
 }
+
+# Old HCP Authentication (if not using environment variables)
+# This is not working.
+
+# variable "hcp_client_id" {
+#  description = "HCP service principal client ID (optional if using env vars)"
+#   type        = string
+#   sensitive   = false
+# }
+
+# variable "hcp_client_secret" {
+#   description = "HCP service principal client secret (optional if using env vars)"
+#   type        = string
+#   sensitive   = true
+# }

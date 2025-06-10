@@ -37,10 +37,10 @@ The module automatically retrieves the following secrets from HCP Vault Secrets:
 ```hcl
 # HCP Configuration (must match networking module)
 waypoint_application = "your-waypoint-app-name"
-ddr_user_hcp_project_resource_id = "your-hcp-project-id"
 
 # For automated environments (Waypoint/TFC), set these environment variables in the UI:
-# HCP_CLIENT_ID     = "your-service-principal-client-id"
+# HCP_PROJECT_ID    = "your-hcp-project-id"
+# HCP_CLIENT_ID     = "your-service-principal-client-id"
 # HCP_CLIENT_SECRET = "your-service-principal-client-secret"
 
 # VM Configuration
@@ -59,7 +59,7 @@ module "vm_addon" {
   
   # HCP Configuration (same as networking module)
   waypoint_application = "my-app"
-  ddr_user_hcp_project_resource_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  # hcp_project_resource_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
   
   # VM Configuration
   vm_count = 4              # Creates 4 identical VMs
