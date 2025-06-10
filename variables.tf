@@ -30,13 +30,9 @@ variable "aws_region" {
 }
 
 # Compute-specific variables
-variable "instance_types" {
-  description = "Instance types for different flavors"
-  type        = map(string)
-  default = {
-    flavor1 = "t3.micro"
-    flavor2 = "t3.small"
-  }
+variable "instance_type" {
+  description = "EC2 instance type to use for all VMs. This is a required variable with no default value."
+  type        = string
 }
 
 variable "root_volume_size" {
@@ -61,4 +57,15 @@ variable "cpu_alarm_threshold" {
   description = "CPU utilization threshold for CloudWatch alarms"
   type        = number
   default     = 80
+}
+
+# VM Count Variable
+variable "vm_count" {
+  description = "Number of VMs to create. This is a required variable with no default value."
+  type        = number
+
+  validation {
+    condition     = var.vm_count > 0
+    error_message = "The vm_count value must be greater than 0."
+  }
 }

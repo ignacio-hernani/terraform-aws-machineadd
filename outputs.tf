@@ -21,15 +21,26 @@ output "private_key_pem" {
 }
 
 output "instance_details" {
-  description = "Basic instance information"
+  description = "Detailed instance information"
   value = {
     for idx, id in module.ec2_instances.instance_ids :
-    "${local.project_name}-${local.environment}-instance-${idx + 1}" => {
-      instance_id = id
-      private_ip  = module.ec2_instances.private_ips[idx]
+    "${local.project_name}-${local.environment}-instance-${idx + 1}-${random_string.identifier.result}" => {
+      instance_id   = id
+      private_ip    = module.ec2_instances.private_ips[idx]
+      instance_type = var.instance_type
+      subnet_id     = length(local.private_subnet_ids) > idx % length(local.private_subnet_ids) ? local.private_subnet_ids[idx % length(local.private_subnet_ids)] : local.all_subnet_ids[idx % length(local.all_subnet_ids)]
     }
   }
-  sensitive   = true
+  sensitive = true
+}
+
+output "instance_summary" {
+  description = "Summary of instance distribution"
+  value = {
+    total_instances = var.vm_count
+    instance_type   = var.instance_type
+    subnets_used    = length(local.private_subnet_ids) > 0 ? "private_subnets" : "all_subnets"
+  }
 }
 
 output "public_ip_note" {
@@ -43,6 +54,7 @@ output "ssh_connection_helper" {
     key_location = "Save the private key to a file and chmod 400"
     username     = "ec2-user (for Amazon Linux)"
     connect_via  = var.assign_elastic_ips ? "Use public IP from AWS Console or CLI" : "Use SSM Session Manager or bastion host"
+    instances    = [for idx in range(var.vm_count) : "${local.project_name}-${local.environment}-instance-${idx + 1}-${random_string.identifier.result}"]
   }
 }
 
@@ -56,10 +68,12 @@ output "hcp_vault_secrets_connected" {
 output "infrastructure_details" {
   description = "Infrastructure details retrieved from HCP Vault Secrets"
   value = {
-    vpc_id       = local.vpc_id
-    environment  = local.environment
-    project_name = local.project_name
-    subnet_count = length(local.all_subnet_ids)
+    vpc_id               = local.vpc_id
+    environment          = local.environment
+    project_name         = local.project_name
+    subnet_count         = length(local.all_subnet_ids)
+    private_subnet_count = length(local.private_subnet_ids)
   }
-  sensitive   = true
+  sensitive = true
 }
+

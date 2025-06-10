@@ -39,10 +39,13 @@ The module automatically retrieves the following secrets from HCP Vault Secrets:
 waypoint_application = "your-waypoint-app-name"
 ddr_user_hcp_project_resource_id = "your-hcp-project-id"
 
-# HCP Authentication (for Terraform Cloud/Enterprise)
 # For automated environments (Waypoint/TFC), set these environment variables in the UI:
 # HCP_CLIENT_ID     = "your-service-principal-client-id"
 # HCP_CLIENT_SECRET = "your-service-principal-client-secret"
+
+# VM Configuration
+vm_count = 3       # Required: Number of VMs to create (no default value)
+instance_type = "t3.micro"  # Required: EC2 instance type for all VMs (no default value)
 
 # AWS Configuration
 aws_region = "us-east-1"
@@ -59,11 +62,11 @@ module "vm_addon" {
   ddr_user_hcp_project_resource_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
   
   # VM Configuration
+  vm_count = 4              # Creates 4 identical VMs
+  instance_type = "t3.micro"  # All VMs will use this instance type
+  
+  # Optional Configuration
   aws_region = "us-west-2"
-  instance_types = {
-    flavor1 = "t3.micro"
-    flavor2 = "t3.small"
-  }
   root_volume_size = 20
   assign_elastic_ips = true
   enable_monitoring = false
@@ -99,21 +102,20 @@ cpu_alarm_threshold = 80   # CPU alarm threshold
 
 ## Instance Configuration
 
-The module creates **2 EC2 instances** with the following configuration:
+The module creates a dynamic number of EC2 instances based on the `vm_count` variable:
 
-### Instance 1
-- **Name**: `{project_name}-{environment}-instance-1`
-- **Type**: Configurable via `instance_types.flavor1`
-- **Subnet**: First private subnet (or first available subnet)
+### Instance Configuration
+- **Name Pattern**: `{project_name}-{environment}-instance-{number}-{random_suffix}`
+- **Instance Type**: All instances use the same type specified by `instance_type`
+- **Subnet Distribution**: Round-robin across private subnets (or all subnets if no private subnets available)
 - **Security Group**: Application security group from networking module
 - **IAM Role**: Instance role from networking module
+- **Tags**: Inherited from common tags plus instance-specific Name tag
 
-### Instance 2
-- **Name**: `{project_name}-{environment}-instance-2`
-- **Type**: Configurable via `instance_types.flavor2`
-- **Subnet**: Second private subnet (or second available subnet)
-- **Security Group**: Application security group from networking module
-- **IAM Role**: Instance role from networking module
+### Subnet Distribution
+- Instances are distributed across available private subnets in a round-robin fashion
+- If no private subnets are available, falls back to all available subnets
+- Distribution ensures even spread of instances across AZs
 
 ## Outputs
 

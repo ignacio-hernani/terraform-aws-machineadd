@@ -25,12 +25,12 @@ provider "aws" {
 
 # HCP Provider Configuration
 provider "hcp" {
-  project_id    = var.ddr_user_hcp_project_resource_id
-  
+  project_id = var.ddr_user_hcp_project_resource_id
+
   # For automated environments (Waypoint/TFC), set these environment variables in the UI:
   # HCP_CLIENT_ID     = "your-service-principal-client-id"
   # HCP_CLIENT_SECRET = "your-service-principal-client-secret"
-  
+
   # Old way (not working):
   #client_id     = var.hcp_client_id     # Falls back to HCP_CLIENT_ID env var if null
   #client_secret = var.hcp_client_secret # Falls back to HCP_CLIENT_SECRET env var if null
@@ -123,23 +123,14 @@ module "ec2_instances" {
   project_name = local.project_name
 
   instances = [
-    {
-      name               = "${local.project_name}-${local.environment}-instance-1-${random_string.identifier.result}"
-      instance_type      = var.instance_types["flavor1"]
-      subnet_id          = length(local.private_subnet_ids) > 0 ? local.private_subnet_ids[0] : local.all_subnet_ids[0]
+    for idx in range(var.vm_count) : {
+      name               = "${local.project_name}-${local.environment}-instance-${idx + 1}-${random_string.identifier.result}"
+      instance_type      = var.instance_type
+      subnet_id          = length(local.private_subnet_ids) > idx % length(local.private_subnet_ids) ? local.private_subnet_ids[idx % length(local.private_subnet_ids)] : local.all_subnet_ids[idx % length(local.all_subnet_ids)]
       security_group_ids = [local.app_security_group_id]
       iam_role_name      = local.instance_role_name
       user_data_file     = null
-      tags               = merge(local.common_tags, { Name = "${local.project_name}-${local.environment}-instance-1-${random_string.identifier.result}" })
-    },
-    {
-      name               = "${local.project_name}-${local.environment}-instance-2-${random_string.identifier.result}"
-      instance_type      = var.instance_types["flavor2"]
-      subnet_id          = length(local.private_subnet_ids) > 1 ? local.private_subnet_ids[1] : (length(local.all_subnet_ids) > 1 ? local.all_subnet_ids[1] : local.all_subnet_ids[0])
-      security_group_ids = [local.app_security_group_id]
-      iam_role_name      = local.instance_role_name
-      user_data_file     = null
-      tags               = merge(local.common_tags, { Name = "${local.project_name}-${local.environment}-instance-2-${random_string.identifier.result}" })
+      tags               = merge(local.common_tags, { Name = "${local.project_name}-${local.environment}-instance-${idx + 1}-${random_string.identifier.result}" })
     }
   ]
 
