@@ -41,6 +41,7 @@ output "instance_summary" {
     instance_type   = var.instance_type
     subnets_used    = length(local.private_subnet_ids) > 0 ? "private_subnets" : "all_subnets"
   }
+  sensitive = true
 }
 
 output "public_ip_note" {
@@ -56,6 +57,7 @@ output "ssh_connection_helper" {
     connect_via  = var.assign_elastic_ips ? "Use public IP from AWS Console or CLI" : "Use SSM Session Manager or bastion host"
     instances    = [for idx in range(var.vm_count) : "${local.project_name}-${local.environment}-instance-${idx + 1}-${random_string.identifier.result}"]
   }
+  sensitive = true
 }
 
 # Debug output to verify HCP Vault Secrets connection

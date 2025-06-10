@@ -121,21 +121,25 @@ The module creates a dynamic number of EC2 instances based on the `vm_count` var
 
 The module provides several useful outputs:
 
+### Instance Information (Non-Sensitive)
 ```hcl
-# Instance Information
 instance_ids                    # List of EC2 instance IDs
 instance_private_ips           # Private IP addresses
-instance_details               # Structured instance information
-
-# Access Information
-key_pair_name                  # SSH key pair name
-private_key_pem                # Private key (sensitive)
-ssh_connection_helper          # SSH connection guidance
-
-# Integration Status
-hcp_vault_secrets_connected    # Confirms HCP connection
-infrastructure_details        # Retrieved infrastructure info
+public_ip_note                # Helper command for viewing public IPs
+hcp_vault_secrets_connected   # Confirms HCP connection
 ```
+
+### Sensitive Information
+```hcl
+instance_details              # Detailed instance information (sensitive)
+instance_summary             # Instance distribution summary (sensitive)
+key_pair_name               # SSH key pair name (sensitive)
+private_key_pem            # Private key in PEM format (sensitive)
+ssh_connection_helper      # SSH connection details (sensitive)
+infrastructure_details    # Infrastructure details from HCP Vault Secrets (sensitive)
+```
+
+> **Note**: Sensitive outputs are marked as such to prevent accidental exposure of infrastructure details. Access these values using appropriate methods like `terraform output -json` or in your automation tools.
 
 ## SSH Access
 
